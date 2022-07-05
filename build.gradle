@@ -35,6 +35,7 @@ test {
 }
 
 dependencies {
+	// 使用了Webflux, Actuator和AOP
 	compile('org.springframework.boot:spring-boot-starter-webflux')
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-aop')
@@ -42,6 +43,8 @@ dependencies {
 	compile("io.github.resilience4j:resilience4j-spring-boot2:${resilience4jVersion}")
 	compile("io.github.resilience4j:resilience4j-all:${resilience4jVersion}") // Optional, only required when you want to use the Decorators class
 	compile("io.github.resilience4j:resilience4j-reactor:${resilience4jVersion}")
+
+	// 这是往Prometheus发送micrometer
 	compile("io.micrometer:micrometer-registry-prometheus")
 
 	compile 'de.codecentric:chaos-monkey-spring-boot:2.1.1'
