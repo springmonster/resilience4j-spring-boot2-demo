@@ -1,6 +1,5 @@
 package io.github.robwin.service;
 
-
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.robwin.exception.BusinessException;
 import io.vavr.control.Try;
@@ -99,6 +98,5 @@ public class BackendBService implements Service {
     private String fallback(Throwable ex) {
         return "Recovered: " + ex.toString();
     }
-
 
 }

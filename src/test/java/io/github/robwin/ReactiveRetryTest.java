@@ -42,14 +42,14 @@ public class ReactiveRetryTest extends AbstractRetryTest {
         checkMetrics(SUCCESS_WITHOUT_RETRY, BACKEND_B, currentCount + 1);
     }
 
-	private void produceFailure(String backend) {
-		ResponseEntity<String> response = restTemplate.getForEntity("/" + backend + "/monoFailure", String.class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+    private void produceFailure(String backend) {
+        ResponseEntity<String> response = restTemplate.getForEntity("/" + backend + "/monoFailure", String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-	private void produceSuccess(String backend) {
-		ResponseEntity<String> response = restTemplate.getForEntity("/" + backend + "/monoSuccess", String.class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-	}
+    private void produceSuccess(String backend) {
+        ResponseEntity<String> response = restTemplate.getForEntity("/" + backend + "/monoSuccess", String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 
 }

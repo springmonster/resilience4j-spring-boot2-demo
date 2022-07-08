@@ -1,8 +1,8 @@
 package io.github.robwin;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class AbstractCircuitBreakerTest extends AbstractIntegrationTest {
 

@@ -1,6 +1,10 @@
 package io.github.robwin.controller;
 
-import io.github.resilience4j.bulkhead.*;
+import io.github.resilience4j.bulkhead.Bulkhead;
+import io.github.resilience4j.bulkhead.BulkheadFullException;
+import io.github.resilience4j.bulkhead.BulkheadRegistry;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -47,13 +51,13 @@ public class BackendBController {
     private final ScheduledExecutorService scheduledExecutorService;
 
     public BackendBController(
-            @Qualifier("backendBService")Service businessBService,
+            @Qualifier("backendBService") Service businessBService,
             CircuitBreakerRegistry circuitBreakerRegistry,
             ThreadPoolBulkheadRegistry threadPoolBulkheadRegistry,
             BulkheadRegistry bulkheadRegistry,
             RetryRegistry retryRegistry,
             RateLimiterRegistry rateLimiterRegistry,
-            TimeLimiterRegistry timeLimiterRegistry){
+            TimeLimiterRegistry timeLimiterRegistry) {
         this.businessBService = businessBService;
         this.circuitBreaker = circuitBreakerRegistry.circuitBreaker(BACKEND_B);
         this.bulkhead = bulkheadRegistry.bulkhead(BACKEND_B);
@@ -65,29 +69,29 @@ public class BackendBController {
     }
 
     @GetMapping("failure")
-    public String failure(){
+    public String failure() {
         return execute(businessBService::failure);
     }
 
     @GetMapping("success")
-    public String success(){
+    public String success() {
         return execute(businessBService::success);
     }
 
     @GetMapping("successException")
-    public String successException(){
+    public String successException() {
         return execute(businessBService::successException);
     }
 
     @GetMapping("ignore")
-    public String ignore(){
+    public String ignore() {
         return Decorators.ofSupplier(businessBService::ignoreException)
                 .withCircuitBreaker(circuitBreaker)
                 .withBulkhead(bulkhead).get();
     }
 
     @GetMapping("monoSuccess")
-    public Mono<String> monoSuccess(){
+    public Mono<String> monoSuccess() {
         return execute(businessBService.monoSuccess());
     }
 
@@ -97,46 +101,46 @@ public class BackendBController {
     }
 
     @GetMapping("fluxSuccess")
-    public Flux<String> fluxSuccess(){
+    public Flux<String> fluxSuccess() {
         return execute(businessBService.fluxFailure());
     }
 
     @GetMapping("fluxFailure")
-    public Flux<String> fluxFailure(){
+    public Flux<String> fluxFailure() {
         return execute(businessBService.fluxFailure());
     }
 
     @GetMapping("monoTimeout")
-    public Mono<String> monoTimeout(){
+    public Mono<String> monoTimeout() {
         return executeWithFallback(businessBService.monoTimeout(), this::monoFallback);
     }
 
     @GetMapping("fluxTimeout")
-    public Flux<String> fluxTimeout(){
+    public Flux<String> fluxTimeout() {
         return executeWithFallback(businessBService.fluxTimeout(), this::fluxFallback);
     }
 
     @GetMapping("futureFailure")
-    public CompletableFuture<String> futureFailure(){
+    public CompletableFuture<String> futureFailure() {
         return executeAsync(businessBService::failure);
     }
 
     @GetMapping("futureSuccess")
-    public CompletableFuture<String> futureSuccess(){
+    public CompletableFuture<String> futureSuccess() {
         return executeAsync(businessBService::success);
     }
 
     @GetMapping("futureTimeout")
-    public CompletableFuture<String> futureTimeout(){
+    public CompletableFuture<String> futureTimeout() {
         return executeAsyncWithFallback(this::timeout, this::fallback);
     }
 
     @GetMapping("fallback")
-    public String failureWithFallback(){
+    public String failureWithFallback() {
         return businessBService.failureWithFallback();
     }
 
-    private String timeout(){
+    private String timeout() {
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
@@ -145,22 +149,21 @@ public class BackendBController {
         return "";
     }
 
-    private <T> Mono<T> execute(Mono<T> publisher){
+    private <T> Mono<T> execute(Mono<T> publisher) {
         return publisher
                 .transform(BulkheadOperator.of(bulkhead))
                 .transform(CircuitBreakerOperator.of(circuitBreaker))
                 .transform(RetryOperator.of(retry));
     }
 
-    private <T> Flux<T> execute(Flux<T> publisher){
+    private <T> Flux<T> execute(Flux<T> publisher) {
         return publisher
                 .transform(BulkheadOperator.of(bulkhead))
                 .transform(CircuitBreakerOperator.of(circuitBreaker))
                 .transform(RetryOperator.of(retry));
     }
 
-
-    private <T> Mono<T> executeWithFallback(Mono<T> publisher, Function<Throwable, Mono<T>> fallback){
+    private <T> Mono<T> executeWithFallback(Mono<T> publisher, Function<Throwable, Mono<T>> fallback) {
         return publisher
                 .transform(TimeLimiterOperator.of(timeLimiter))
                 .transform(BulkheadOperator.of(bulkhead))
@@ -170,7 +173,7 @@ public class BackendBController {
                 .onErrorResume(BulkheadFullException.class, fallback);
     }
 
-    private <T> Flux<T> executeWithFallback(Flux<T> publisher, Function<Throwable, Flux<T>> fallback){
+    private <T> Flux<T> executeWithFallback(Flux<T> publisher, Function<Throwable, Flux<T>> fallback) {
         return publisher
                 .transform(TimeLimiterOperator.of(timeLimiter))
                 .transform(BulkheadOperator.of(bulkhead))
@@ -180,7 +183,7 @@ public class BackendBController {
                 .onErrorResume(BulkheadFullException.class, fallback);
     }
 
-    private <T> T execute(Supplier<T> supplier){
+    private <T> T execute(Supplier<T> supplier) {
         return Decorators.ofSupplier(supplier)
                 .withCircuitBreaker(circuitBreaker)
                 .withBulkhead(bulkhead)
@@ -188,16 +191,16 @@ public class BackendBController {
                 .get();
     }
 
-    private <T> CompletableFuture<T> executeAsync(Supplier<T> supplier){
+    private <T> CompletableFuture<T> executeAsync(Supplier<T> supplier) {
         return Decorators.ofSupplier(supplier)
                 .withThreadPoolBulkhead(threadPoolBulkhead)
                 .withTimeLimiter(timeLimiter, scheduledExecutorService)
                 .withCircuitBreaker(circuitBreaker)
-                .withRetry(retry,scheduledExecutorService)
+                .withRetry(retry, scheduledExecutorService)
                 .get().toCompletableFuture();
     }
 
-    private <T> CompletableFuture<T> executeAsyncWithFallback(Supplier<T> supplier, Function<Throwable, T> fallback){
+    private <T> CompletableFuture<T> executeAsyncWithFallback(Supplier<T> supplier, Function<Throwable, T> fallback) {
         return Decorators.ofSupplier(supplier)
                 .withThreadPoolBulkhead(threadPoolBulkhead)
                 .withTimeLimiter(timeLimiter, scheduledExecutorService)

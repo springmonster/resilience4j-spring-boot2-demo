@@ -1,8 +1,8 @@
 spring:
   application.name: resilience4j-demo
   jackson.serialization.indent_output: true
-  profiles:
-    active: chaos-monkey
+#  profiles:
+#    active: chaos-monkey
 
 server:
   port: 9080
@@ -63,6 +63,7 @@ resilience4j.circuitbreaker:
       failureRateThreshold: 50
       eventConsumerBufferSize: 10
       recordFailurePredicate: io.github.robwin.exception.RecordFailurePredicate
+
 resilience4j.retry:
   configs:
     default:
@@ -79,6 +80,7 @@ resilience4j.retry:
       baseConfig: default
     backendB:
       baseConfig: default
+
 resilience4j.bulkhead:
   configs:
     default:
@@ -130,30 +132,30 @@ resilience4j.timelimiter:
       baseConfig: default
     backendB:
       baseConfig: default
-chaos:
-  monkey:
-    enabled: true
-    watcher:
-      service: true
-      controller: true
-      rest-controller: true
-      repository: true
-      component: true
-    assaults:
-      latency-active: true
-      latency-range-start: 1000
-      latency-range-end: 6000
-      level: 3
-
-management:
-  endpoint:
-    chaosmonkey:
-      enabled: true
-    chaosmonkeyjmx:
-      enabled: true
-
-  endpoints:
-    web:
-      exposure:
-        include: "*"
+#chaos:
+#  monkey:
+#    enabled: true
+#    watcher:
+#      service: true
+#      controller: true
+#      rest-controller: true
+#      repository: true
+#      component: true
+#    assaults:
+#      latency-active: true
+#      latency-range-start: 1000
+#      latency-range-end: 6000
+#      level: 3
+#
+#management:
+#  endpoint:
+#    chaosmonkey:
+#      enabled: true
+#    chaosmonkeyjmx:
+#      enabled: true
+#
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
 

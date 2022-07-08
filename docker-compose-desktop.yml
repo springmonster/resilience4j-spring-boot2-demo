@@ -21,7 +21,7 @@ services:
     networks:
       - net
   app:
-  # build and start spring application inside a separate container using the same network as prometheus
+    # build and start spring application inside a separate container using the same network as prometheus
     build: .
     ports:
       - "9080:9080"

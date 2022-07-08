@@ -1,12 +1,11 @@
 package io.github.robwin;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import io.github.resilience4j.retry.Retry.Metrics;
+import io.github.resilience4j.retry.RetryRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
-import io.github.resilience4j.retry.Retry.Metrics;
-import io.github.resilience4j.retry.RetryRegistry;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class AbstractRetryTest extends AbstractIntegrationTest {
 
